@@ -1,0 +1,189 @@
+version: '3.3'
+services:
+  nginx:
+     image: jc21/nginx-proxy-manager:latest
+     container_name: nginx
+     volumes:
+       - "./config/nginx-proxy-manager:/data"
+     ports:
+       - "80:80"
+       - "443:443"
+       - "81:81"
+     restart: unless-stopped
+
+  dlna:
+    image: vladgh/minidlna
+    container_name: dlna
+    environment:
+      - MINIDLNA_MEDIA_DIR_1=/media/images
+      - MINIDLNA_FRIENDLY_NAME=PhotosDLNA
+    volumes:
+      - "./data/images:/media/images"
+    ports:
+      - 1900:1900/udp
+      - 8200:8200/tcp
+    restart: unless-stopped
+
+  prowlarr:
+    image: linuxserver/prowlarr:develop
+    container_name: prowlarr
+    volumes:
+      - "./config/prowlarr:/config"
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/New_York}
+    ports:
+      - "9696:9696"
+    restart: unless-stopped
+
+  radarr:
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    volumes:
+      - "./downloads:/downloads"
+      - "./data/movies:/movies"
+      - "./config/radarr:/config"
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/New_York}
+    ports:
+      - "7878:7878"
+    restart: unless-stopped
+
+  sonarr:
+    image: linuxserver/sonarr:latest
+    container_name: sonarr
+    volumes:
+      - "./downloads:/downloads"
+      - "./data/tv:/tv"
+      - "./data/anime:/anime"
+      - "./config/sonarr:/config"
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/New_York}
+    ports:
+      - "8989:8989"
+    restart: unless-stopped
+
+  lidarr:
+    image: linuxserver/lidarr:latest
+    container_name: lidarr
+    volumes:
+      - "./config/lidarr:/config"
+      - "./data/music:/music"
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/New_York}
+    ports:
+      - "8686:8686"
+    restart: unless-stopped
+
+  readarr:
+   image: hotio/readarr:nightly
+   container_name: readarr
+   volumes:
+     - "./config/readarr:/config"
+     - "./data/books:/books"
+     - "./downloads:/downloads"
+   environment:
+     - PUID=${PUID:-1000}
+     - PGID=${PGID:-1000}
+     - TZ=${TZ:-America/New_York}
+   ports:
+     - "8787:8787"
+   restart: unless-stopped
+
+  bazarr:
+    image: linuxserver/bazarr
+    container_name: bazarr
+    volumes:
+      - "./config/bazarr:/config"
+      - "./data/movies:/movies"
+      - "/htpc_data/media/TV Shows:/tv"
+    environment:
+      - HOME="/root"
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/New_York}
+    ports:
+      - "6767:6767"
+    restart: unless-stopped
+
+  organizr:
+    image: organizr/organizr
+    container_name: organizr
+    volumes:
+      - "./config/organizr:/config"
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+    ports:
+      - "5554:80"
+    restart: unless-stopped
+
+  overseer:
+    image: linuxserver/overseerr
+    container_name: overseerr
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/New_York}
+    volumes:
+      - ./config/overseerr:/config
+    ports:
+      - "5055:5055"
+    restart: unless-stopped
+
+  alpine-qbittorrent-openvpn:
+    image: guillaumedsde/alpine-qbittorrent-openvpn:latest
+    container_name: qbit
+    volumes:
+      - "./downloads:/downloads"
+      - "./config/qbit:/config"
+      - "/etc/localtime:/etc/localtime:ro"
+    env_file:
+      - ./env/pia
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - LAN=192.168.0.0/16
+    ports:
+      - "8888:8080"
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+
+  tautulli:
+    image: ghcr.io/tautulli/tautulli
+    container_name: tautulli
+    volumes:
+      - "./config/tautulli:/config"
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/New_York}
+    ports:
+      - 8181:8181
+    restart: unless-stopped
+
+  sabnzbd:
+        image: linuxserver/sabnzbd:latest
+        container_name: sabnzbd
+        volumes:
+          - "./downloads:/downloads"
+          - "./config/sabnzbd:/config"
+        environment:
+          - PUID=${PUID:-1000}
+          - PGID=${PGID:-1000}
+          - TZ=${TZ:-America/New_York}
+        ports:
+          - "28080:8080"
+          - "29090:9090"
+        restart: unless-stopped
+
+volumes:
+
